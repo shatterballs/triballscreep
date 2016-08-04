@@ -8,8 +8,8 @@
  */
 //myfunctions
 var myFunctions =  {
-    ayylmao:    function ayylmao() {
-                    console.log("NO ERRORS");
+    testExport:    function testExport() {
+                    console.log("NO ERRORS, EXPORT SUCCESSFUL.");
                 }
     creepcount: function creepcount() {
                     console.log('Harvesters: ' + _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length);
@@ -30,8 +30,4 @@ var myFunctions =  {
                    return selectedTarget;
                 }
 module.exports = myFunctions
-//we define an object called 'require('myFunction)' here
-//there are two functions in the require('myFunction) object, which are ayylmao() and creepcount()
-//to call these functions in console, 
-//require("myFunction").ayylmao();
-//require("myFunction").creepcount;
+
