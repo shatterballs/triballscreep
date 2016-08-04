@@ -27,8 +27,8 @@ if(stage=="setup")
     /*CREEP ACTION CONTROL*/
     //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
     for(var NAME in Game.creeps){
-        var curcreep = Game.creeps[NAME];
-        if(curcreep.memory.Role=='Harvester'){
+        var creep = Game.creeps[NAME];
+        if(creep.memory.Role=='Harvester'){
             //run script here for creeps with harvester role
         }
     }
