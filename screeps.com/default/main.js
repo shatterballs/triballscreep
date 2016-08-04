@@ -1,10 +1,21 @@
 module.exports.loop = function () {
 /*to do
-Setup stage-
-harvester from spawn
+>>CURRENT GOALS: setup=>defend=>attack<< 
+Setup stage:
+SPAWN   ->  harvesters   -   CHECK
+        ->  builders
+            -> extensions
+            -> other structures (Roads? need to check documentation)
+                (moveByPath for roads?)
+        -> upgraders
+ROLE
+    methods for movement
+    moveTo(target, [opts]) ---cpu cost is high
+    findPathTo(target, [opts]), save returned value to another var path
+    ->reuse the returned path with move(path[0].direction)
+        
 */
-//creating the first harvester
-//checking whether there's enough energy
+
 var stage = "setup";
 if(stage=="setup")
 {
@@ -14,14 +25,14 @@ if(stage=="setup")
             Game.spawns['Spawn1'].createCreep([WORK, MOVE, CARRY], null, {role: 'harvester'});
         }
     }
-    else //more than 5 harvesters
-    {
-        
+    else{ //more than 5 harvesters, build some builders, then some extenstions (to create creeps with more modules)
+
     }
     /*CREEP ACTION CONTROL*/
     //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
     for(var NAME in Game.creeps){
-        if(Game.creeps[NAME].memory.Role=='Harvester'){
+        var curcreep = Game.creeps[NAME];
+        if(curcreep.memory.Role=='Harvester'){
             //run script here for creeps with harvester role
         }
     }
