@@ -9,11 +9,7 @@ SPAWN   ->  harvesters   -   CHECK
                 (moveByPath for roads?)
         -> upgraders
 ROLE
-    methods for movement
-    moveTo(target, [opts]) ---cpu cost is high
-    findPathTo(target, [opts]), save returned value to another var path
-    ->reuse the returned path with move(path[0].direction)
-        
+
 */
 
 var stage = "setup";
