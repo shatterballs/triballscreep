@@ -13,6 +13,7 @@ STRUCTURE_CONTAINER -> build beside sources?, get creeps to sit on top and do th
 */
 
 var roleharvester = require("role.harvester");
+var myFunctions = require("my.Functions");
 
 module.exports.loop = function () {
         var urgent = 0;
@@ -39,47 +40,64 @@ module.exports.loop = function () {
             //no. of containers depends on 
             //  1.number of sources
             //  2.controller (one in each room)
+            
             for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
-                var room = Game.room[ROOMNAME];
+                var room = Game.rooms[ROOMNAME];
                 var sources = room.find(FIND_SOURCES);   
                 var countsources = _.filter(sources).length; //countsources is the number of sources in the current room
-                for(SOURCENAME in sources){
-                        room.lookAtArea(sources[SOURCENAME].pos.y-1, sources[SOURCENAME].pos.x-1, sources[SOURCENAME].pos.y+1,sources[SOURCENAME].pos.x+1,1)
-                        //position object in sources[SOURCENAME]= sources[SOURCENAME].pos
-                }       //lookAtArea(top, left, bottom, right, [asArray]) Get the list of objects at the specified room area.
-            if(_.filter(Game.creeps, (creep) => creep.memory.role == 'zombieworker').length < countsources){
-                    for(var SPAWNNAME in Game.spawns){
-                        if(Game.spawns[SPAWNNAME].canCreateCreep([WORK, WORK, MOVE], null}) == 0){ 
-                                Game.spawns[SPAWNNAME].createCreep([WORK, WORK, MOVE], null, {role: 'zomebieworker'});
-                }
-                
-            }
-            else{ 
-                
+                for(var SOURCENAME in sources){
+                    //left/right/top/bottom coordinates of the source in two arrays
+                    var sourcex = sources[SOURCENAME].pos.x;
+                    var sourcey = sources[SOURCENAME].pos.y;
+                    var arrayx = [sourcex-1, sourcex, sourcex+1];
+                    var arrayy = [sourcey-1, sourcey, sourcey+1];
                     
+                    if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
+                        if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
+                            for(var i=0; i<2; i++){
+                                for(var j=0; j<2; j++){
+                                    if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
+                                        //create zombieworkers here
+                                    break; break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    //making container construction site around the source
+                    
+                    
+                    
+                    
+                        //var room.lookAtArea(sources[SOURCENAME].pos.y-1, sources[SOURCENAME].pos.x-1, sources[SOURCENAME].pos.y+1,sources[SOURCENAME].pos.x+1,1);
+                        //position object in sources[SOURCENAME]= sources[SOURCENAME].pos
+               }       //lookAtArea(top, left, bottom, right, [asArray]) Get the list of objects at the specified room area.
             }
-        }
+            
         /*CREEP ACTION CONTROL*/
         //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
-        for(var NAME in Game.creeps){
-                if(_.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length == 0){//avoiding error logs when there are 0 creeps
-                    break;
+        
+            for(var NAME in Game.creeps){
+                var creep = Game.creeps[NAME];
+                if(creep.ticksToLive < 100){//RENEW CREEPS
+                        //move to spawn, renew
+                        var spawn = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
+                        if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE){
+                                creep.moveTo(spawn);
+                        }
+                }else{//ACTIONS ACCORDING TO ROLES
+                    if(creep.memory.role=='thebeginning'){
+                        roleharvester.run(creep); //modify harvester behaviours in role.harvester module
+                    }
                 }
-        var creep = Game.creeps[NAME];
-        if(creep.ticksToLive < 100){//RENEW CREEPS
-                //move to spawn, renew
-                var spawn = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
-                if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE){
-                        creep.moveTo(spawn);
-                }
-        }else{//ACTIONS ACCORDING TO ROLES
-            if(creep.memory.role=='thebeginning'){
-                roleharvester.run(creep); //modify harvester behaviours in role.harvester module
+            
             }
+        
         }
        
     }
-}
+
 
 
     

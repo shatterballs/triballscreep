@@ -25,17 +25,17 @@ var myFunctions =  {
                 },
     findclosest: function findclosest(creep, targetType){
                    var alltargets = creep.room.find(targetType); //shows all the sources in the room where the creep is
-                   var selectedTarget = alltargets[0];
+                   var selectedtarget = alltargets[0];
                    var x;
                    for(x in alltargets){
                      //compare the distance between the source and creep, set closestsource to that
                      var loopTargetDist = creep.pos.getRangeTo(alltargets[x]); //distance between creep and one of the source
-                     var selectedTargetDist = creep.pos.getRangeTo(selectedTarget);
+                     var selectedTargetDist = creep.pos.getRangeTo(selectedtarget);
                      if(selectedTargetDist > loopTargetDist){
-                        selectedTarget = allTarget[x];
+                        selectedtarget = alltargets[x];
                      }
                    }
-                   return selectedTarget;
+                   return selectedtarget;
                 }
 }
 module.exports = myFunctions;
