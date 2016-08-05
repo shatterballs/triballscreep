@@ -8,23 +8,28 @@
  */
 var myFunctions = require('my.Functions');
  
-var roleHarvester = {
+var roleharvester = {
    //this is a function within the rolHarvester object. Can be called by roleHarvester.run(creep)
   run: function(creep){
     //might have to use getKeys() in myFunction to see what's in the creep(?)
     //1. go to energy source and extract if carrying<carryingcap
     //2. go back to spawn/ other structures to dump energy
-      if(_.sum(creep.carry) < creep.carryCapacity){//check if maxed/not
-         var target = myFunctions.findclosest(creep, FIND_SOURCES);  
+        if(creep.carry.energy < creep.carryCapacity){//check if maxed/not
+            var source = myFunctions.findclosest(creep, FIND_SOURCES);  
          //myFunctions.findclosest(creep, FIND_SOURCES) should return source object that is closest to the creep
          //check my.Functions.js to debug, lol
-         if(creep.harvest(target) == ERR_NOT_IN_RANGE){
-            creep.moveTo(target);
-         }
+            if(creep.harvest(source) == ERR_NOT_IN_RANGE){
+                creep.moveTo(source);
+            }
+        }else{
+            var target = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
+            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+                creep.moveTo(target);
+            }
+        }
     }
-  }
 }
 
-module.exports = {
+module.exports = roleharvester;
 
-};
+//lol need to check for constants
