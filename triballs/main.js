@@ -30,30 +30,52 @@ module.exports.loop = function () {
                 var keeperLairs = Game.rooms['sim'].find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
                 var lairSources = keeperLairs[0].pos.findClosestByRange(FIND_SOURCES);
                 var safeSources = _.filter(allSources, function(n){ return n != lairSources});
+                var containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
+                //arrange safeSources according to distance from spawn
 
         //containers besides the safe sources
-        for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
+       for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
                 var room = Game.rooms[ROOMNAME]; 
-                for(var SOURCENAME in safeSources){
+                //find closest safeSources
+                var tempSSources = safeSources;
+                while(containersitecount < 2){
+                        var distarray = [];
+                        for(var i = 0; i<tempSSources.length; i++){
+                                distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
+                        }
+                        var index = 0;
+                        var value = distarray[0];
+                        for (var i = 1; i < distarray.length; i++) {
+                          if (distarray[i] < value) {
+                            value = distarray[i];
+                            index = i;
+                          }
+                        } //closest safeSources to spawn1: tempSSources[index]
+                        /*
+                        console.log('closest to spawn safe source: ' + tempSSources[index])
+                        console.log('tempSSources: ' + tempSSources)
+                        console.log('distarray: ' + distarray)
+                        console.log('index: ' + index)
+                        console.log('value: ' + value)
+                        */
                     //left/right/top/bottom coordinates of the source in two arrays
-                    var x = safeSources[SOURCENAME].pos.x;
-                    var y = safeSources[SOURCENAME].pos.y;
+                    var x = tempSSources[index].pos.x;
+                    var y = tempSSources[index].pos.y;
                     var arrayx = [x-1, x, x+1];
-                    var arrayy = [y-1, y, y+1];
-                        if(sitecount <=2){ //limits the number of construction sites for containers to be <=2 (max.5)
+                    var arrayy = [y-1, y, y+1]; //limits the number of construction sites for containers to be < 2 (max.2)
                                 if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
                                         if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
                                                 for(var i=0; i<2; i++){
                                                         for(var j=0; j<2; j++){
                                                                 if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
-                                                                        sitecount++;
+                                                                        containersitecount++;
                                                                         break; break;
                                                                 }
                                                         }
                                                 }
                                         }
                                 }
-                        }
+                        tempSSources = _.filter(tempSSources, function(currentObject){ return currentObject != tempSSources[index]});
                 }
         }
 //---------------------------------------------------------------------------------------------------
