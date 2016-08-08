@@ -20,6 +20,16 @@ module.exports.loop = function () {
         var stage = "setup";
         if(stage=="setup")
         {
+            function Sources(){
+                this.allSources = Game.rooms['sim'].find(FIND_SOURCES); //returns an array with 3 source objects
+                this.keeperLairs = Game.rooms['sim'].find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
+                this.lairSources = this.keeperLairs//[0].pos.findClosestByRange(FIND_SOURCES);
+            }
+            var mysources = new Sources();
+            //mysources.safeSources = _.filter(mysources.allSources, function(n){ return n != mysources.lairSources});
+            //mysources.allSources = Game.rooms['sim'].find(FIND_SOURCES);
+            console.log(mysources.lairSource);
+            //mysources.run(Game.rooms.sim);
             /*SPAWN CONTROL*/
             //setup, thebeginning
             if(_.filter(Game.creeps, (creep) => creep.memory.role == 'thebeginning').length < 2){
@@ -40,7 +50,7 @@ module.exports.loop = function () {
             //no. of containers depends on 
             //  1.number of sources
             //  2.controller (one in each room)
-            
+            /*
             for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
                 var room = Game.rooms[ROOMNAME];
                 var sources = room.find(FIND_SOURCES);   
@@ -74,7 +84,7 @@ module.exports.loop = function () {
                         //position object in sources[SOURCENAME]= sources[SOURCENAME].pos
                }       //lookAtArea(top, left, bottom, right, [asArray]) Get the list of objects at the specified room area.
             }
-            
+            */
         /*CREEP ACTION CONTROL*/
         //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
         
