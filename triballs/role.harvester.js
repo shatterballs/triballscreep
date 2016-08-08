@@ -7,7 +7,6 @@
  * mod.thing == 'a thing'; // true
  */
 var myFunctions = require('my.Functions');
-var myroom = require('my.room');
 
 var roleharvester = {
    //this is a function within the rolHarvester object. Can be called by roleHarvester.run(creep)
