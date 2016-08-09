@@ -13,6 +13,7 @@ STRUCTURE_CONTAINER -> build beside sources?, get creeps to sit on top and do th
 */
 
 var roleharvester = require("role.harvester");
+//var rolezombieworker = require("role.zombieworker");
 var myFunctions = require("my.Functions");
 /*GLOBAL VARIABLES*/
         //structure count
@@ -79,6 +80,10 @@ module.exports.loop = function () {
                 }
         }
         //pair completed containers with zombieharvesters
+        containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
+        //count no. of zomebieworkers
+        //if(no. of zomebieworkers < containersites)
+        //spawn one zombieworker
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
         {
