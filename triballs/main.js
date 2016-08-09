@@ -32,7 +32,7 @@ module.exports.loop = function () {
                 var safeSources = _.filter(allSources, function(n){ return n != lairSources});
                 var containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
                 //arrange safeSources according to distance from spawn
-
+//--------------------------------------------------------------------------------------------------
         //containers besides the safe sources
        for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
                 var room = Game.rooms[ROOMNAME]; 
@@ -78,6 +78,7 @@ module.exports.loop = function () {
                         tempSSources = _.filter(tempSSources, function(currentObject){ return currentObject != tempSSources[index]});
                 }
         }
+        //pair completed containers with zombieharvesters
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
         {
