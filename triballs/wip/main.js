@@ -13,11 +13,80 @@ STRUCTURE_CONTAINER -> build beside sources?, get creeps to sit on top and do th
 */
 
 var roleharvester = require("role.harvester");
+//var rolezombieworker = require("role.zombieworker");
 var myFunctions = require("my.Functions");
+/*GLOBAL VARIABLES*/
+        //structure count
+                var sitecount = 0; //constructionsite
+                var containercount = 0; //containers
 
 module.exports.loop = function () {
+        /*GAME STAGE*/
         var urgent = 0;
         var stage = "setup";
+//---------------------------------------------------------------------------------------------------
+        /*GLOBAL VARIABLES*/
+        //Keeping track of sources, currently only works in rooms['sim']
+                var allSources = Game.rooms['sim'].find(FIND_SOURCES); //returns an array with 3 source objects
+                var keeperLairs = Game.rooms['sim'].find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
+                var lairSources = keeperLairs[0].pos.findClosestByRange(FIND_SOURCES);
+                var safeSources = _.filter(allSources, function(n){ return n != lairSources});
+                var containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
+                //var sourcecontainersites = [];
+                //arrange safeSources according to distance from spawn
+//--------------------------------------------------------------------------------------------------
+        //containers besides the safe sources
+       for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
+                var room = Game.rooms[ROOMNAME]; 
+                //find closest safeSources
+                var tempSSources = safeSources;
+                while(containersitecount < 2){
+                        var distarray = [];
+                        for(var i = 0; i<tempSSources.length; i++){
+                                distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
+                        }
+                        var index = 0;
+                        var value = distarray[0];
+                        for (var i = 1; i < distarray.length; i++) {
+                          if (distarray[i] < value) {
+                            value = distarray[i];
+                            index = i;
+                          }
+                        } //closest safeSources to spawn1: tempSSources[index]
+                        /*
+                        console.log('closest to spawn safe source: ' + tempSSources[index])
+                        console.log('tempSSources: ' + tempSSources)
+                        console.log('distarray: ' + distarray)
+                        console.log('index: ' + index)
+                        console.log('value: ' + value)
+                        */
+                    //left/right/top/bottom coordinates of the source in two arrays
+                    var x = tempSSources[index].pos.x;
+                    var y = tempSSources[index].pos.y;
+                    var arrayx = [x-1, x, x+1];
+                    var arrayy = [y-1, y, y+1]; //limits the number of construction sites for containers to be < 2 (max.2)
+                                if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
+                                        if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
+                                                for(var i=0; i<2; i++){
+                                                        for(var j=0; j<2; j++){
+                                                                if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
+                                                                        containersitecount++;
+                                                                        break; break;
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        tempSSources = _.filter(tempSSources, function(currentObject){ return currentObject != tempSSources[index]});
+                }
+        }
+        //pair completed containers with zombieharvesters
+        containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
+        //zomebieworkers
+        var zombieworkers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'zombieworker'});
+        //if(no. of zomebieworkers < containersites)
+        //spawn one zombieworker
+//---------------------------------------------------------------------------------------------------
         if(stage=="setup")
         {
             /*SPAWN CONTROL*/
@@ -40,41 +109,9 @@ module.exports.loop = function () {
             //no. of containers depends on 
             //  1.number of sources
             //  2.controller (one in each room)
-            
-            for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
-                var room = Game.rooms[ROOMNAME];
-                var sources = room.find(FIND_SOURCES);   
-                var countsources = _.filter(sources).length; //countsources is the number of sources in the current room
-                for(var SOURCENAME in sources){
-                    //left/right/top/bottom coordinates of the source in two arrays
-                    var sourcex = sources[SOURCENAME].pos.x;
-                    var sourcey = sources[SOURCENAME].pos.y;
-                    var arrayx = [sourcex-1, sourcex, sourcex+1];
-                    var arrayy = [sourcey-1, sourcey, sourcey+1];
-                    
-                    if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
-                        if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
-                            for(var i=0; i<2; i++){
-                                for(var j=0; j<2; j++){
-                                    if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
-                                        //create zombieworkers here
-                                    break; break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    //making container construction site around the source
-                    
-                    
-                    
-                    
-                        //var room.lookAtArea(sources[SOURCENAME].pos.y-1, sources[SOURCENAME].pos.x-1, sources[SOURCENAME].pos.y+1,sources[SOURCENAME].pos.x+1,1);
-                        //position object in sources[SOURCENAME]= sources[SOURCENAME].pos
-               }       //lookAtArea(top, left, bottom, right, [asArray]) Get the list of objects at the specified room area.
-            }
-            
+            /*
+
+            */
         /*CREEP ACTION CONTROL*/
         //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
         
