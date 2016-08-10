@@ -31,8 +31,7 @@ module.exports.loop = function () {
                 var keeperLairs = Game.rooms['sim'].find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
                 var lairSources = keeperLairs[0].pos.findClosestByRange(FIND_SOURCES);
                 var safeSources = _.filter(allSources, function(n){ return n != lairSources});
-                var containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
-                //var sourcecontainersites = [];
+                var containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
                 //arrange safeSources according to distance from spawn
 //--------------------------------------------------------------------------------------------------
         //containers besides the safe sources
@@ -40,7 +39,7 @@ module.exports.loop = function () {
                 var room = Game.rooms[ROOMNAME]; 
                 //find closest safeSources
                 var tempSSources = safeSources;
-                while(containersitecount < 2){
+                while(containersites.length < 2){
                         var distarray = [];
                         for(var i = 0; i<tempSSources.length; i++){
                                 distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
@@ -70,7 +69,6 @@ module.exports.loop = function () {
                                                 for(var i=0; i<2; i++){
                                                         for(var j=0; j<2; j++){
                                                                 if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
-                                                                        containersitecount++;
                                                                         break; break;
                                                                 }
                                                         }
@@ -81,10 +79,11 @@ module.exports.loop = function () {
                 }
         }
         //pair completed containers with zombieharvesters
-        containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
+        containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
+        //var sourcecontainers = Game.rooms['sim'].f
         //zomebieworkers
         var zombieworkers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'zombieworker'});
-        //if(no. of zomebieworkers < containersites)
+        if(zomebieworkers.length < containersites)
         //spawn one zombieworker
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
