@@ -89,6 +89,7 @@ module.exports.loop = function () {
                         tempSSources = _.filter(tempSSources, function(currentObject){ return currentObject != tempSSources[index]});
                 }
         }
+//--------------------------------------------------------------------------------------------------
         //pair completed containers with zombieharvesters
         containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
         //var sourcecontainers = Game.rooms['sim'].f
@@ -99,7 +100,13 @@ module.exports.loop = function () {
                         Game.spawns['Spawn1'].CreateCreep([WORK, WORK, MOVE], null, {role: 'zombieworker'});
                 }
         }
-        //spawn one zombieworker
+        //carriers
+        var carriers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'carrier'});
+        if(carriers.length < zombieworkers.length*2){
+                if(Game.spawns['Spawn1'].canCreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null) == 0){
+                        Game.spawns['Spawn1'].CreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, {role: 'CARRIER'});
+                }
+        }
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
         {
@@ -145,7 +152,7 @@ module.exports.loop = function () {
                         rolezombieworker.run(creep);
                     }
                     if(creep.memory.role=='carrier'){
-                            
+                        rolecarrier.run(creep);
                     }
                 }
             
