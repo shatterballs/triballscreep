@@ -83,7 +83,11 @@ module.exports.loop = function () {
         //var sourcecontainers = Game.rooms['sim'].f
         //zomebieworkers
         var zombieworkers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'zombieworker'});
-        if(zomebieworkers.length < containersites)
+        if(zomebieworkers.length < containersites){
+                if(Game.spawns['Spawn1'].canCreateCreep([WORK, WORK, MOVE], null) == 0){
+                        Game.spawns['Spawn1'].CreateCreep([WORK, WORK, MOVE], null, {role: 'zombieworker'});
+                }
+        }
         //spawn one zombieworker
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
