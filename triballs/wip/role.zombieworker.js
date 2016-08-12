@@ -57,4 +57,4 @@ var rolezomebieworker = {
     }
 }
 
-module.exports = roleharvester;
+module.exports = rolezombieworker;
