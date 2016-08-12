@@ -13,7 +13,7 @@ STRUCTURE_CONTAINER -> build beside sources?, get creeps to sit on top and do th
 */
 
 var roleharvester = require("role.harvester");
-//var rolezombieworker = require("role.zombieworker");
+var rolezombieworker = require("role.zombieworker");
 var myFunctions = require("my.Functions");
 /*GLOBAL VARIABLES*/
         //structure count
@@ -21,9 +21,20 @@ var myFunctions = require("my.Functions");
                 var containercount = 0; //containers
 
 module.exports.loop = function () {
-        /*GAME STAGE*/
+        /*GAME STAGE*/ //store in room.memory instead, NEED CHANGE
         var urgent = 0;
         var stage = "setup";
+        /*creep types*/
+        for(var SPAWNNAME in Game.spawns){//cycle through all the owned rooms
+                var spawn = Game.spawns[SPAWNNAME];
+                var energycap = spawn.room.energyCapacityAvailable);
+                if(energycap < 300){
+                        spawn.memory.harvesterconfig = [WORK, CARRY, MOVE];
+                        spawn.memory.zombieworkerconfig = [WORK, WORK, MOVE];
+                        spawn.memory.carrierconfig = [CARRY, CARRY, CARRY, CARRY, MOVE];
+                }
+                
+                
 //---------------------------------------------------------------------------------------------------
         /*GLOBAL VARIABLES*/
         //Keeping track of sources, currently only works in rooms['sim']
@@ -129,6 +140,12 @@ module.exports.loop = function () {
                 }else{//ACTIONS ACCORDING TO ROLES
                     if(creep.memory.role=='thebeginning'){
                         roleharvester.run(creep); //modify harvester behaviours in role.harvester module
+                    }
+                    if(creep.memory.role=='zombieworker'){
+                        rolezombieworker.run(creep);
+                    }
+                    if(creep.memory.role=='carrier'){
+                            
                     }
                 }
             
