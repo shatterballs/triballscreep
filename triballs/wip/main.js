@@ -19,6 +19,7 @@ var myFunctions = require("my.Functions");
         //structure count
                 var sitecount = 0; //constructionsite
                 var containercount = 0; //containers
+                var poscount = 0; //construction sites for roads
 
 module.exports.loop = function () {
         /*GAME STAGE*/ //store in room.memory instead, NEED CHANGE
@@ -107,6 +108,28 @@ module.exports.loop = function () {
                         Game.spawns['Spawn1'].CreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, {role: 'carrier'});
                 }
         }
+//---------------------------------------------------------------------------------------------------
+        //roads and paths
+        //get path from spawn to FINISHED containers, assume one spawn for now
+        var sourcecontainers = Game.rooms['sim'].find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
+        var path1 = Game.rooms['sim'].findPath(Game.spawns['Spawn1'].pos, sourcecontainers[0].pos, {ignoreCreeps: true}); 
+        var roadsites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_ROAD}});
+        //var poscount = 0;
+        if(roadsites.length < 1){
+                if(Game.rooms['sim'].createConstructionSite(path1[poscount].x, path1[poscount].y, STRUCTURE_ROAD) == 0){
+                        poscount++;
+                        if(poscount > path1.length){ //condition for path1 finished
+                                poscount = 0; //reset poscount, ready for next path
+                                //need to recode for path1
+                }
+        }
+        //find the path from spawn to container
+        //if constructionsite for roads < 1,
+        //[0] object from path => construction site ,<<await for completion
+        //construction conplete, => set [1] object from path => construction site, << await completion 
+        //...
+        //
+        
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
         {
