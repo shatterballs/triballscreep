@@ -104,7 +104,7 @@ module.exports.loop = function () {
         var carriers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'carrier'});
         if(carriers.length < zombieworkers.length*2){
                 if(Game.spawns['Spawn1'].canCreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null) == 0){
-                        Game.spawns['Spawn1'].CreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, {role: 'CARRIER'});
+                        Game.spawns['Spawn1'].CreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, {role: 'carrier'});
                 }
         }
 //---------------------------------------------------------------------------------------------------
