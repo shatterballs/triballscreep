@@ -18,7 +18,6 @@ var myFunctions = require("my.Functions");
 /*GLOBAL VARIABLES*/
         //structure count
                 var sitecount = 0; //constructionsite
-                var containercount = 0; //containers
                 var poscount = 0; //construction sites for roads
 
 module.exports.loop = function () {
@@ -28,33 +27,83 @@ module.exports.loop = function () {
         /*creep types*/
         for(var SPAWNNAME in Game.spawns){//cycle through all the owned rooms
                 var spawn = Game.spawns[SPAWNNAME];
-                var energycap = spawn.room.energyCapacityAvailable);
+                var energycap = spawn.room.energyCapacityAvailable;
                 if(energycap < 300){
                         spawn.memory.harvesterconfig = [WORK, CARRY, MOVE];
                         spawn.memory.zombieworkerconfig = [WORK, WORK, MOVE];
                         spawn.memory.carrierconfig = [CARRY, CARRY, CARRY, CARRY, MOVE];
                 }
+        }
                 
                 
 //---------------------------------------------------------------------------------------------------
         /*GLOBAL VARIABLES*/
-        //Keeping track of sources, currently only works in rooms['sim']
-                var allSources = Game.rooms['sim'].find(FIND_SOURCES); //returns an array with 3 source objects
-                var keeperLairs = Game.rooms['sim'].find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
+        for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
+             var room = Game.rooms[ROOMNAME];
+                var allSources = room.find(FIND_SOURCES); //returns an array with 3 source objects
+                var keeperLairs = room.find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
                 var lairSources = keeperLairs[0].pos.findClosestByRange(FIND_SOURCES);
                 var safeSources = _.filter(allSources, function(n){ return n != lairSources});
-                var containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
+                var containersites = room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
                 //arrange safeSources according to distance from spawn
 //--------------------------------------------------------------------------------------------------
-        //containers besides the safe sources
-       for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
-                var room = Game.rooms[ROOMNAME]; 
-                //find closest safeSources
-                var tempSSources = safeSources;
-                while(containersites.length < 2){
+       
+       if(room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length < 2){
+            var tempSSources = safeSources;
+            var containersitecount = containersites.length;
+            //rearrange safeSources array into arrSources, accending order
+            var m = 0;
+            var arrSources = [];
+            var sslength = safeSources.length;
+            while(m < sslength){
+                var distarray = [];
+                for(var i = 0; i<tempSSources.length; i++){
+                    distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
+                }
+                var index = 0;
+                var value = distarray[0];
+                for (var i = 0; i < distarray.length; i++) {
+                  if (distarray[i] < value) {
+                    value = distarray[i];
+                    index = i;
+                  }
+                }
+                var closestSSource = tempSSources[index];
+                arrSources.push(closestSSource);
+                m++;
+                _.remove(tempSSources, function(obj){return obj == closestSSource})
+            }
+            
+            var vacantflag = false;
+            var exitflag = false;
+            var n = 0;
+            for(n = 0; n < arrSources.length; n++){
+                var x = arrSources[n].pos.x;
+                var y = arrSources[n].pos.y;
+                var arrayx = [x-1, x, x+1];
+                var arrayy = [y-1, y, y+1];
+                if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
+                    if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
+                        vacantflag = true;
+                    }
+                }
+                if(vacantflag == true){
+                    for(var i=0; i<2 ; i++){
+                        for(var j=0; j<2; j++){
+                            if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
+                                console.log("CONTAINER CS PLACED @ " + "x: " + arrayx[i] + "  y: " + arrayy[j]);
+                                containersitecount++;
+                            }
+                        }
+                    }
+                }
+            }
+       }
+        /*containers besides the safe sources
+                if(room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length <=2){
                         var distarray = [];
-                        for(var i = 0; i<tempSSources.length; i++){
-                                distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
+                        for(var i = 0; i<safeSources.length; i++){
+                                distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(safeSources[i]));
                         }
                         var index = 0;
                         var value = distarray[0];
@@ -63,14 +112,14 @@ module.exports.loop = function () {
                             value = distarray[i];
                             index = i;
                           }
-                        } //closest safeSources to spawn1: tempSSources[index]
-                        /*
-                        console.log('closest to spawn safe source: ' + tempSSources[index])
-                        console.log('tempSSources: ' + tempSSources)
+                        }
+                        
+                        console.log('closest to spawn safe source: ' + safeSources[index])
+                        console.log('safeSources: ' + safeSources)
                         console.log('distarray: ' + distarray)
                         console.log('index: ' + index)
                         console.log('value: ' + value)
-                        */
+                        
                     //left/right/top/bottom coordinates of the source in two arrays
                     var x = tempSSources[index].pos.x;
                     var y = tempSSources[index].pos.y;
@@ -81,14 +130,14 @@ module.exports.loop = function () {
                                                 for(var i=0; i<2; i++){
                                                         for(var j=0; j<2; j++){
                                                                 if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
-                                                                        break; break;
+                                                                        
                                                                 }
                                                         }
                                                 }
                                         }
                                 }
-                        tempSSources = _.filter(tempSSources, function(currentObject){ return currentObject != tempSSources[index]});
                 }
+                */
         }
 //--------------------------------------------------------------------------------------------------
         //pair completed containers with zombieharvesters
@@ -96,7 +145,7 @@ module.exports.loop = function () {
         //var sourcecontainers = Game.rooms['sim'].f
         //zomebieworkers
         var zombieworkers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'zombieworker'});
-        if(zomebieworkers.length < containersites){
+        if(zombieworkers.length < containersites){
                 if(Game.spawns['Spawn1'].canCreateCreep([WORK, WORK, MOVE], null) == 0){
                         Game.spawns['Spawn1'].CreateCreep([WORK, WORK, MOVE], null, {role: 'zombieworker'});
                 }
@@ -108,6 +157,7 @@ module.exports.loop = function () {
                         Game.spawns['Spawn1'].CreateCreep([CARRY, CARRY, CARRY, CARRY, MOVE], null, {role: 'carrier'});
                 }
         }
+/*
 //---------------------------------------------------------------------------------------------------
         //roads and paths
         //get path from spawn to FINISHED containers, assume one spawn for now
@@ -121,6 +171,7 @@ module.exports.loop = function () {
                         if(poscount > path1.length){ //condition for path1 finished
                                 poscount = 0; //reset poscount, ready for next path
                                 //need to recode for path1
+                        }
                 }
         }
         //find the path from spawn to container
@@ -130,23 +181,17 @@ module.exports.loop = function () {
         //...
         //
         
+*/
 //---------------------------------------------------------------------------------------------------
         if(stage=="setup")
         {
             /*SPAWN CONTROL*/
             //setup, thebeginning
-            if(_.filter(Game.creeps, (creep) => creep.memory.role == 'thebeginning').length < 2){
+            if(_.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length < 5){
                     for(var SPAWNNAME in Game.spawns){//cycle through all keys in the Game.spawns object
                         if(Game.spawns[SPAWNNAME].canCreateCreep([WORK, MOVE, CARRY], null) == 0){ 
-                        //Game.spawns[SPAWNNAME] is the spawn object that have enough energy to spawn
-                                if(_.filter(Game.creeps, (creep) => creep.memory.role == 'thebeginning').length == 0){
-                                        Game.spawns[SPAWNNAME].createCreep([WORK, MOVE, CARRY], 'Adam', {role: 'thebeginning'});
-                                }
-                                else{
-                                        Game.spawns[SPAWNNAME].createCreep([WORK, MOVE, CARRY], 'Eve', {role: 'thebeginning'});
-                                }
+                            Game.spawns[SPAWNNAME].createCreep([WORK, MOVE, CARRY], null, {role: 'harvester'});
                         }
-                        
                     }
             }
             //spawning zombieworkers, nummber of zombieworkers = no. of containers in room
@@ -168,7 +213,7 @@ module.exports.loop = function () {
                                 creep.moveTo(spawn);
                         }
                 }else{//ACTIONS ACCORDING TO ROLES
-                    if(creep.memory.role=='thebeginning'){
+                    if(creep.memory.role=='harvester'){
                         roleharvester.run(creep); //modify harvester behaviours in role.harvester module
                     }
                     if(creep.memory.role=='zombieworker'){

@@ -22,14 +22,19 @@ var roleharvester = {
                 creep.moveTo(source);
             }
         }else{
-            var target = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
-            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
-                creep.moveTo(target);
+            var spawn = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
+            var constructionsite = myFunctions.findclosest(creep, FIND_CONSTRUCTION_SITES);
+            if(spawn.energy == spawn.energyCapacity){
+                if(creep.build(constructionsite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+                    creep.moveTo(constructionsite);
+                }
+            }else{
+                if(creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+                    creep.moveTo(spawn);
+                }
             }
         }
     }
 }
 
 module.exports = roleharvester;
-
-//lol need to check for constants
