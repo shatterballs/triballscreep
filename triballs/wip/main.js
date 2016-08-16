@@ -47,97 +47,60 @@ module.exports.loop = function () {
                 var containersites = room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
                 //arrange safeSources according to distance from spawn
 //--------------------------------------------------------------------------------------------------
-       
-       if(room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length < 2){
-            var tempSSources = safeSources;
-            var containersitecount = containersites.length;
-            //rearrange safeSources array into arrSources, accending order
-            var m = 0;
-            var arrSources = [];
-            var sslength = safeSources.length;
-            while(m < sslength){
-                var distarray = [];
-                for(var i = 0; i<tempSSources.length; i++){
-                    distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
-                }
-                var index = 0;
-                var value = distarray[0];
-                for (var i = 0; i < distarray.length; i++) {
-                  if (distarray[i] < value) {
-                    value = distarray[i];
-                    index = i;
-                  }
-                }
-                var closestSSource = tempSSources[index];
-                arrSources.push(closestSSource);
-                m++;
-                _.remove(tempSSources, function(obj){return obj == closestSSource})
-            }
-            
-            var vacantflag = false;
-            var exitflag = false;
-            var n = 0;
-            for(n = 0; n < arrSources.length; n++){
-                var x = arrSources[n].pos.x;
-                var y = arrSources[n].pos.y;
-                var arrayx = [x-1, x, x+1];
-                var arrayy = [y-1, y, y+1];
-                if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
-                    if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
-                        vacantflag = true;
-                    }
-                }
-                if(vacantflag == true){
-                    for(var i=0; i<2 ; i++){
-                        for(var j=0; j<2; j++){
-                            if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
-                                console.log("CONTAINER CS PLACED @ " + "x: " + arrayx[i] + "  y: " + arrayy[j]);
-                                containersitecount++;
-                            }
-                        }
-                    }
-                }
-            }
-       }
-        /*containers besides the safe sources
-                if(room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length <=2){
+               var ccsc = room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
+               if(ccsc < 2){
+                    var tempSSources = safeSources;
+                    var containersitecount = containersites.length;
+                    //rearrange safeSources array into arrSources, accending order
+                    var m = 0;
+                    var arrSources = [];
+                    var sslength = safeSources.length;
+                    while(m < sslength){
                         var distarray = [];
-                        for(var i = 0; i<safeSources.length; i++){
-                                distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(safeSources[i]));
+                        for(var i = 0; i<tempSSources.length; i++){
+                            distarray.push(Game.spawns['Spawn1'].pos.getRangeTo(tempSSources[i]));
                         }
                         var index = 0;
                         var value = distarray[0];
-                        for (var i = 1; i < distarray.length; i++) {
+                        for (var i = 0; i < distarray.length; i++) {
                           if (distarray[i] < value) {
                             value = distarray[i];
                             index = i;
                           }
                         }
-                        
-                        console.log('closest to spawn safe source: ' + safeSources[index])
-                        console.log('safeSources: ' + safeSources)
-                        console.log('distarray: ' + distarray)
-                        console.log('index: ' + index)
-                        console.log('value: ' + value)
-                        
-                    //left/right/top/bottom coordinates of the source in two arrays
-                    var x = tempSSources[index].pos.x;
-                    var y = tempSSources[index].pos.y;
-                    var arrayx = [x-1, x, x+1];
-                    var arrayy = [y-1, y, y+1]; //limits the number of construction sites for containers to be < 2 (max.2)
-                                if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
-                                        if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
-                                                for(var i=0; i<2; i++){
-                                                        for(var j=0; j<2; j++){
-                                                                if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
-                                                                        
-                                                                }
-                                                        }
-                                                }
-                                        }
+                        var closestSSource = tempSSources[index];
+                        arrSources.push(closestSSource);
+                        m++;
+                        _.remove(tempSSources, function(obj){return obj == closestSSource})
+                    }
+                    
+                    
+                    var n = 0;
+                    for(n = 0; (n<arrSources.length)||(ccsc<2); n++){
+                        var vacantflag = false;
+                        var exitflag = false;
+                        var x = arrSources[n].pos.x;
+                        var y = arrSources[n].pos.y;
+                        var arrayx = [x-1, x, x+1];
+                        var arrayy = [y-1, y, y+1];
+                        if(_.filter(room.lookForAtArea(LOOK_STRUCTURES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), {structure: STRUCTURE_CONTAINER}).length == 0){
+                            if(_.filter(room.lookForAtArea(LOOK_CONSTRUCTION_SITES,arrayy[0],arrayx[0],arrayy[2],arrayx[2],true), 'constructionSite').length == 0){
+                                vacantflag = true;
+                            }
+                        }
+                        if(vacantflag == true){
+                            for(var i=0; (i<2)||(!exitflag); i++){
+                                for(var j=0; (j<2)||(!exitflag); j++){
+                                    if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
+                                        console.log("CONTAINER CS PLACED @ " + "x: " + arrayx[i] + "  y: " + arrayy[j]);
+                                        ccsc++;
+                                        exitflag = true;
+                                    }
                                 }
-                }
-                */
+                            }
+                        }
+                    }
+               }
         }
 //--------------------------------------------------------------------------------------------------
         //pair completed containers with zombieharvesters
