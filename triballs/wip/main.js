@@ -76,7 +76,7 @@ module.exports.loop = function () {
                     
                     
                     var n = 0;
-                    for(n = 0; (n<arrSources.length)||(ccsc<2); n++){
+                    for(n = 0; (n<arrSources.length)&&(ccsc<2); n++){
                         var vacantflag = false;
                         var exitflag = false;
                         var x = arrSources[n].pos.x;
@@ -89,8 +89,8 @@ module.exports.loop = function () {
                             }
                         }
                         if(vacantflag == true){
-                            for(var i=0; (i<2)||(!exitflag); i++){
-                                for(var j=0; (j<2)||(!exitflag); j++){
+                            for(var i=0; (i<2)&&(!exitflag); i++){
+                                for(var j=0; (j<2)&&(!exitflag); j++){
                                     if(room.createConstructionSite(arrayx[i], arrayy[j], STRUCTURE_CONTAINER) == 0){
                                         console.log("CONTAINER CS PLACED @ " + "x: " + arrayx[i] + "  y: " + arrayy[j]);
                                         ccsc++;
