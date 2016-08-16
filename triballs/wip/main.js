@@ -27,11 +27,11 @@ module.exports.loop = function () {
         /*creep types*/
         for(var SPAWNNAME in Game.spawns){//cycle through all the owned rooms
                 var spawn = Game.spawns[SPAWNNAME];
-                var energycap = spawn.room.energyCapacityAvailable;
-                if(energycap < 300){
-                        spawn.memory.harvesterconfig = [WORK, CARRY, MOVE];
-                        spawn.memory.zombieworkerconfig = [WORK, WORK, MOVE];
-                        spawn.memory.carrierconfig = [CARRY, CARRY, CARRY, CARRY, MOVE];
+                var energycap = spawn.energyCapacity;
+                if(energycap <= 300){
+                    spawn.memory.starterconfig = [WORK, CARRY, MOVE];
+                    spawn.memory.zombieworkerconfig = [WORK, WORK, MOVE];
+                    spawn.memory.carrierconfig = [CARRY, CARRY, CARRY, CARRY, MOVE];
                 }
         }
                 
@@ -48,7 +48,7 @@ module.exports.loop = function () {
                 //arrange safeSources according to distance from spawn
 //--------------------------------------------------------------------------------------------------
                var ccsc = room.find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}}).length;
-               if(ccsc < 2){
+               if(ccsc < 1){
                     var tempSSources = safeSources;
                     var containersitecount = containersites.length;
                     //rearrange safeSources array into arrSources, accending order
@@ -76,7 +76,7 @@ module.exports.loop = function () {
                     
                     
                     var n = 0;
-                    for(n = 0; (n<arrSources.length)&&(ccsc<2); n++){
+                    for(n = 0; (n<arrSources.length)&&(ccsc<1); n++){
                         var vacantflag = false;
                         var exitflag = false;
                         var x = arrSources[n].pos.x;
@@ -149,21 +149,14 @@ module.exports.loop = function () {
         if(stage=="setup")
         {
             /*SPAWN CONTROL*/
-            //setup, thebeginning
-            if(_.filter(Game.creeps, (creep) => creep.memory.role == 'harvester').length < 5){
+            if(_.filter(Game.creeps, (creep) => creep.memory.role == 'starter').length < 5){
                     for(var SPAWNNAME in Game.spawns){//cycle through all keys in the Game.spawns object
-                        if(Game.spawns[SPAWNNAME].canCreateCreep([WORK, MOVE, CARRY], null) == 0){ 
-                            Game.spawns[SPAWNNAME].createCreep([WORK, MOVE, CARRY], null, {role: 'harvester'});
+                        var spawn = Game.spawns[SPAWNNAME];
+                        if(spawn.canCreateCreep(spawn.memory.starterconfig, null) == 0){ 
+                            spawn.createCreep(spawn.memory.starterconfig, null, {role: 'starter'});
                         }
                     }
             }
-            //spawning zombieworkers, nummber of zombieworkers = no. of containers in room
-            //no. of containers depends on 
-            //  1.number of sources
-            //  2.controller (one in each room)
-            /*
-
-            */
         /*CREEP ACTION CONTROL*/
         //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
         
@@ -176,8 +169,8 @@ module.exports.loop = function () {
                                 creep.moveTo(spawn);
                         }
                 }else{//ACTIONS ACCORDING TO ROLES
-                    if(creep.memory.role=='harvester'){
-                        roleharvester.run(creep); //modify harvester behaviours in role.harvester module
+                    if(creep.memory.role=='starter'){
+                        rolestarter.run(creep); //modify harvester behaviours in role.harvester module
                     }
                     if(creep.memory.role=='zombieworker'){
                         rolezombieworker.run(creep);
