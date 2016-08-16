@@ -12,7 +12,7 @@ ROLE    -> harvesters - CHECK
 STRUCTURE_CONTAINER -> build beside sources?, get creeps to sit on top and do their jobs (make containers||creep pairs)
 */
 
-var roleharvester = require("role.harvester");
+var rolestarter = require("role.starter");
 var rolezombieworker = require("role.zombieworker");
 var myFunctions = require("my.Functions");
 /*GLOBAL VARIABLES*/
