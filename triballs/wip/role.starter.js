@@ -8,7 +8,7 @@
  */
 var myFunctions = require('my.Functions');
  
-var roleharvester = {
+var rolestarter = {
    //this is a function within the rolHarvester object. Can be called by roleHarvester.run(creep)
   run: function(creep){
     //might have to use getKeys() in myFunction to see what's in the creep(?)
@@ -37,4 +37,4 @@ var roleharvester = {
     }
 }
 
-module.exports = roleharvester;
+module.exports = rolestarter;
