@@ -9,25 +9,39 @@
 var myFunctions = require('my.Functions');
  
 var rolecarrier = {
-   //this is a function within the rolHarvester object. Can be called by roleHarvester.run(creep)
   run: function(creep){
-    //might have to use getKeys() in myFunction to see what's in the creep(?)
-    //1. go to energy source and extract if carrying<carryingcap
-    //2. go back to spawn/ other structures to dump energy
-        if(creep.carry.energy < creep.carryCapacity){//check if maxed/not
-            var source = myFunctions.findclosest(creep, FIND_SOURCES);  
-         //myFunctions.findclosest(creep, FIND_SOURCES) should return source object that is closest to the creep
-         //check my.Functions.js to debug, lol
-            if(creep.harvest(source) == ERR_NOT_IN_RANGE){
-                creep.moveTo(source);
-            }
-        }else{
-            var target = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
-            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
-                creep.moveTo(target);
-            }
-        }
+    //pair up with zombieworkers
+    if(creep.memory.paired == false){
+     var zombieworkers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'zombieworker'}); //same room?
+     var carriers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'carrier'});
+     var i;
+     var j;
+     for(i=0; i<zombieworkers.length; i++){//!!!check paired
+       if(zombieworkers[i].memory.pcarrierc < 2){ //check if enough carriers are already assigned to the zombieworker yet. if not enough, pair the carrier with it
+        creep.memory.pzombieworkerId = zombieworkers[i].id;
+        creep.memory.pcontainerId = zombieworkers[i].memory.pcontainerId;
+        creep.memory.paired = true;
+        //zombieworkers[i].memory.pcarrierc++; //!!!need a failsafe if carrier dies, perhaps a line of code within to actually count memory in carriers
+        //^bad practice to change memory of other objects outside of those objects, should be only retriving data from other objects
+        console.log('"CARRIER '+creep.name + '"IS PAIRED WITH "ZOMBIEWORKER '+zombiworker[i].name+ '"');
+       }
+     }
     }
+    if(creep.memory.paired){
+     var pzombieworker = Game.getObjectById(creep.memory.pzombieworkerId);
+     var pcontainer = Game.getObjectById(creep.memory.pcontainerId);
+     if(creep.carry.energy < creep.carryCapacity){//check if maxed/not
+         if(creep.withdraw(pcontainer, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+             creep.moveTo(pcontainer);
+         }
+     }else{
+         var target = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
+         if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+             creep.moveTo(target);
+         }
+     }
+    }
+  }
 }
 
 module.exports = rolecarrier;
