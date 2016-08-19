@@ -6,8 +6,7 @@ SPAWN   ->  *zombieharvesters
             -> extensions
             -> other structures (Roads? need to check documentation)
                 (moveByPath for roads?)
-        -> upgraders
-ROLE    -> harvesters - CHECK
+
 
 STRUCTURE_CONTAINER -> build beside sources?, get creeps to sit on top and do their jobs (make containers||creep pairs)
 */
@@ -19,11 +18,12 @@ var myFunctions = require("my.Functions");
         //structure count
                 var sitecount = 0; //constructionsite
                 var poscount = 0; //construction sites for roads
+                var starterindex = 0;
 
 module.exports.loop = function () {
         /*GAME STAGE*/ //store in room.memory instead, NEED CHANGE
         var urgent = 0;
-        var stage = "setup";
+        var stage = 0;
         /*creep types*/
         for(var SPAWNNAME in Game.spawns){//cycle through all the owned rooms
                 var spawn = Game.spawns[SPAWNNAME];
@@ -34,10 +34,46 @@ module.exports.loop = function () {
                     spawn.memory.carrierconfig = [CARRY, CARRY, CARRY, CARRY, MOVE];
                 }
         }
+if(stage == 0){//cycle through all keys in the Game.spawns object
+        var spawn = Game.spawns['Spawn1'];
+        spawn.memory.starterconfig = [WORK, CARRY, MOVE];
+        spawn.memory.zombieworkerconfig = [WORK, WORK, MOVE];
+        spawn.memory.carrierconfig = [CARRY, CARRY, CARRY, CARRY, MOVE];
+        var room = Game.rooms['sim'];
+        var allSources = room.find(FIND_SOURCES); //returns an array with 3 source objects
+        var keeperLairs = room.find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}});//returns an array with 1 keeper lair object
+        var lairSources = keeperLairs[0].pos.findClosestByRange(FIND_SOURCES);
+        var safeSources = _.filter(allSources, function(n){ return n != lairSources});
+        
+        var temparray =[];
+        for(var i=0; i<safeSources.length; i++){
+                temparray.push(safeSources[i].id);
+        }
+        room.memory.safeSourcesId = temparray;
+        //1. - check
+        var ssc = safeSources.length; //need to create ssc no. of groups
+        
+        if(starterindex < ssc){
+                if(_.filter(Game.creeps, (creep) => creep.memory.role == 'starter').length < ssc*3){//check if starter count is enough
+                        if(_.filter(Game.creeps, (creep) => creep.memory.sgroup == starterindex).length < 3){
+                                if(spawn.canCreateCreep(spawn.memory.starterconfig, null) == 0){ 
+                                        spawn.createCreep(spawn.memory.starterconfig, null, {role: 'starter', sgroup: starterindex, paired: false});
+                                        console.log('starterindex: ' + starterindex)
+                                }   
+                        }else{starterindex++;} //check if the groups are fully occupied
+                }
+        }
                 
-                
+             
+/*objectives:
+1.set mine-able sources -
+2.set 3 starter creeps per mine-able source -
+3.if creepcreation complete, build extensions -
+4.until energycap requirement met -
+*/
+}
+if(stage == 1){       
 //---------------------------------------------------------------------------------------------------
-        /*GLOBAL VARIABLES*/
         for(var ROOMNAME in Game.rooms){//cycle through all the owned rooms
              var room = Game.rooms[ROOMNAME];
                 var allSources = room.find(FIND_SOURCES); //returns an array with 3 source objects
@@ -104,11 +140,11 @@ module.exports.loop = function () {
         }
 //--------------------------------------------------------------------------------------------------
         //pair completed containers with zombieharvesters
-        containersites = Game.rooms['sim'].find(FIND_CONSTRUCTION_SITES, {filter: {structureType: STRUCTURE_CONTAINER}});
+        containers = Game.rooms['sim'].find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
         //var sourcecontainers = Game.rooms['sim'].f
         //zomebieworkers
         var zombieworkers = _.filter(Game.creeps, function(creep){return creep.memory.role == 'zombieworker'});
-        if(zombieworkers.length < containersites){
+        if(zombieworkers.length < containers.length){
                 if(Game.spawns['Spawn1'].canCreateCreep([WORK, WORK, MOVE], null) == 0){
                         Game.spawns['Spawn1'].CreateCreep([WORK, WORK, MOVE], null, {role: 'zombieworker'});
                 }
@@ -145,46 +181,36 @@ module.exports.loop = function () {
         //
         
 */
+}
 //---------------------------------------------------------------------------------------------------
-        if(stage=="setup")
-        {
-            /*SPAWN CONTROL*/
-            if(_.filter(Game.creeps, (creep) => creep.memory.role == 'starter').length < 5){
-                    for(var SPAWNNAME in Game.spawns){//cycle through all keys in the Game.spawns object
-                        var spawn = Game.spawns[SPAWNNAME];
-                        if(spawn.canCreateCreep(spawn.memory.starterconfig, null) == 0){ 
-                            spawn.createCreep(spawn.memory.starterconfig, null, {role: 'starter'});
-                        }
-                    }
-            }
+
         /*CREEP ACTION CONTROL*/
         //loop through all the properties in an object, in this case, object is the Game.creeps, and it contains all the creep objects in game.
         
-            for(var NAME in Game.creeps){
-                var creep = Game.creeps[NAME];
-                if(creep.ticksToLive < 100){//RENEW CREEPS
-                        //move to spawn, renew
-                        var spawn = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
-                        if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE){
-                                creep.moveTo(spawn);
-                        }
-                }else{//ACTIONS ACCORDING TO ROLES
-                    if(creep.memory.role=='starter'){
-                        rolestarter.run(creep); //modify harvester behaviours in role.harvester module
-                    }
-                    if(creep.memory.role=='zombieworker'){
-                        rolezombieworker.run(creep);
-                    }
-                    if(creep.memory.role=='carrier'){
-                        rolecarrier.run(creep);
-                    }
+for(var NAME in Game.creeps){
+        var creep = Game.creeps[NAME];
+        if(creep.ticksToLive < 100){//RENEW CREEPS
+                //move to spawn, renew
+                var spawn = myFunctions.findclosest(creep, FIND_MY_SPAWNS);
+                if(spawn.renewCreep(creep) == ERR_NOT_IN_RANGE){
+                        creep.moveTo(spawn);
                 }
-            
+        }else{//ACTIONS ACCORDING TO ROLES
+            if(creep.memory.role=='starter'){
+                rolestarter.run(creep); //modify harvester behaviours in role.harvester module
             }
-        
+            if(creep.memory.role=='zombieworker'){
+                rolezombieworker.run(creep);
+            }
+            if(creep.memory.role=='carrier'){
+                rolecarrier.run(creep);
+            }
         }
+}
+        
        
-    }
+        
+}//EXPORT LOOP END BRACKET
 
 
 
