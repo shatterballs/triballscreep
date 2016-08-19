@@ -15,7 +15,7 @@ var rolestarter = {
    if(creep.memory.paired == false){
     var safeSourcesId = creep.room.memory.safeSourcesId;
     var i=0;
-    for(i=0; i<safeSourcesId.length && creep.memory.paired; i++){
+    for(i=0; i<safeSourcesId.length && !creep.memory.paired; i++){
      if(_.filter(Game.creeps, function(creep){return creep.memory.pssId == safeSourcesId[i]}).length < 3){
       creep.memory.pssId = safeSourcesId[i];
       creep.memory.paired = true;
