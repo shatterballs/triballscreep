@@ -12,6 +12,14 @@ var rolezombieworker = {
   run: function(creep){
     //1. go to vacant container and is adjacent to source
     //2. continue to harvest until container is full
+    var carriers = _filter(Game.creeps, function(creep){return creep.memory.role == 'carrier'});
+    //check if the carriers are paired to this creep, and count no.
+    creep.memory.pcarrierc = 0;
+    for(var CREEPNAME in carriers){ //scan through all carriers, and 
+     if(carriers[CREEPNAME].memory.pzombieworkerId == creep.id){ //check if paired with this zombieworker creep
+      creep.memory.pcarrierc++;
+     }
+    }
         if(creep.memory.harvesting == false){
           var roomcontainers = creep.room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
           var i;
@@ -26,17 +34,19 @@ var rolezombieworker = {
                 }
               }
             }
-            if(vacantflag){
-              creep.moveTo(roomcontainers[j]);
-              creep.memory.pairedcontainerId = roomcontainers[j].id;
-              creep.memory.pairedsourceId = roomcontainer[j].pos.getClosestByRange(FIND_SOURCES).id
+            if(vacantflag){//if vacant, set
+              creep.memory.pcontainerId = roomcontainers[j].id;
+              creep.memory.psourceId = roomcontainer[j].pos.getClosestByRange(FIND_SOURCES).id
               creep.memory.harvesting = true;
             }
           }
         }else{
-          var pairedcontainer = Game.getObjectById(creep.memory.pairedcontainerId);
-          if(_.sum(pairedcontainer.store) < pairedcontainer.storeCapacity){
-            creep.harvest(pairedcontainer);
+          var pcontainer = Game.getObjectById(creep.memory.pcontainerId);
+          var psource = Game.getObjectById(creep.memory.psourceId);
+          if(_.sum(pcontainer.store) < pcontainer.storeCapacity){
+            if(creep.harvest(psource) == ERR_NOT_IN_RANGE){
+             creep.moveTo(pcontainer);
+            }
           }
         }
     }
