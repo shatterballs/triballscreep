@@ -19,7 +19,7 @@ var rolezombieworker = {
           for(i=0; i < roomcontainers.length; i++){//check if occupied by zomebieworker creep
             var containerobj = creep.room.lookAt(roomcontainers[i]);
             var vacantflag = true; //assume vacant
-            for(j=0; j<containerobj.length; j++){
+            for(j=0; (j<containerobj.length)&&(!vacantflag); j++){
               if(containerobj[j].type == 'creep'){// check if creep is on top
                 if(containerobj[j].creep.memory.role == 'zombieworker'){//check if creep is zombieworker
                   vacantflag = false; //zombieworker already occupied the container
