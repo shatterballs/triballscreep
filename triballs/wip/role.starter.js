@@ -11,13 +11,20 @@ var myFunctions = require('my.Functions');
 var rolestarter = {
    //this is a function within the rolHarvester object. Can be called by roleHarvester.run(creep)
   run: function(creep){
-    //might have to use getKeys() in myFunction to see what's in the creep(?)
-    //1. go to energy source and extract if carrying<carryingcap
-    //2. go back to spawn/ other structures to dump energy
+   //pairing with safeSourcesId, 3 starters per source
+   if(creep.memory.paired == false){
+    var safeSourcesId = creep.room.memory.safeSourcesId;
+    var i=0;
+    for(i=0; i<safeSourcesId.length && creep.memory.paired; i++){
+     if(_.filter(Game.creeps, function(creep){return creep.memory.pssId == safeSourcesId[i]}).length < 3){
+      creep.memory.pssId = safeSourcesId[i];
+      creep.memory.paired = true;
+     }
+    }
+   }
         if(creep.carry.energy < creep.carryCapacity){//check if maxed/not
-            var source = myFunctions.findclosest(creep, FIND_SOURCES);  
+            var source = Game.getObjectById(creep.memory.pssId);  
          //myFunctions.findclosest(creep, FIND_SOURCES) should return source object that is closest to the creep
-         //check my.Functions.js to debug, lol
             if(creep.harvest(source) == ERR_NOT_IN_RANGE){
                 creep.moveTo(source);
             }
